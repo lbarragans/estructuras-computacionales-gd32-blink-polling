@@ -1,7 +1,7 @@
 # Exercise 00 - Blink con espera activa en GD32VW553
 
 **Curso:** Estructuras Computacionales  
-**Autora:** Laura Daniela Barragan Silva
+**Autora:** Laura Daniela Barragan Silva  
 **Plataforma:** GD32VW553HMQ6 / GD32VW553HMQ7  
 **Arquitectura:** Nuclei RISC-V RV32  
 **Entorno:** Visual Studio Code, CMake, Ninja y Nuclei RISC-V GCC
