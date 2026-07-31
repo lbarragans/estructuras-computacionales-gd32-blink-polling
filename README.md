@@ -61,11 +61,15 @@ flowchart TD
 ```text
 estructuras-computacionales-gd32-blink-polling/
 ├── .vscode/
+│   ├── extensions.json
+│   ├── launch.example.json
 │   └── tasks.json
 ├── Doc/
 │   ├── 1_SETUP.md
 │   ├── 2_BUILD_AND_FLASH.md
-│   └── 3_CONCEPTS_AND_QUESTIONS.md
+│   ├── 3_CONCEPTS_AND_QUESTIONS.md
+│   ├── 4_DEBUGGING.md
+│   └── 5_TROUBLESHOOTING.md
 ├── Inc/
 │   └── gd32vw55x_libopt.h
 ├── Src/
@@ -75,6 +79,7 @@ estructuras-computacionales-gd32-blink-polling/
 │   └── toolchain-riscv.cmake
 ├── tools/
 │   ├── configure.ps1
+│   ├── create_debug_config.ps1
 │   ├── flash.ps1
 │   └── local_config.example.ps1
 ├── .gitignore
@@ -101,27 +106,25 @@ estructuras-computacionales-gd32-blink-polling/
 3. Edite las tres rutas del archivo local.
 4. Abra esta carpeta como raíz del espacio de trabajo en VS Code.
 5. Ejecute la tarea `Build + Flash GD32`.
+6. Para depurar, ejecute `Create Debug Configuration` y seleccione
+   `Debug GD32VW553 - Cortex Debug`.
 
 Las instrucciones detalladas están en [Doc/1_SETUP.md](Doc/1_SETUP.md) y
 [Doc/2_BUILD_AND_FLASH.md](Doc/2_BUILD_AND_FLASH.md).
 
+La depuración se explica en [Doc/4_DEBUGGING.md](Doc/4_DEBUGGING.md) y los
+errores frecuentes en [Doc/5_TROUBLESHOOTING.md](Doc/5_TROUBLESHOOTING.md).
+
 ## 7. Aprendizajes y evolución del ejercicio
 
-Este ejercicio presenta una implementación sencilla del control de una salida
-digital y permite comprobar el funcionamiento completo del entorno de
-desarrollo: edición, compilación, enlace y programación del microcontrolador.
-
-Al finalizar se pueden reconocer los siguientes conceptos:
+Este ejercicio permite comprobar el entorno completo de edición, compilación,
+enlace y programación del microcontrolador. Al finalizar se reconocen:
 
 - configuración de un GPIO como salida digital;
 - acceso al hardware mediante la biblioteca del fabricante;
-- compilación cruzada para una arquitectura RISC-V;
+- compilación cruzada para RISC-V;
 - generación y programación de un archivo ejecutable;
 - funcionamiento y limitaciones de una espera activa.
-
-La espera activa facilita la primera prueba del hardware, pero mantiene al
-procesador ocupado y produce un tiempo aproximado. Esta implementación servirá
-como referencia para compararla posteriormente con una solución no bloqueante.
 
 | Característica | Implementación actual | Evolución posterior |
 |---|---|---|
@@ -131,8 +134,8 @@ como referencia para compararla posteriormente con una solución no bloqueante.
 | Organización | Bucle bloqueante | Máquina de estados |
 | Escalabilidad | Limitada | Adecuada para múltiples tareas |
 
-En el siguiente ejercicio se conservará el control del LED en PC13, pero la
-temporización se realizará mediante SysTimer y una máquina de estados.
+El siguiente ejercicio conserva PC13, pero utiliza SysTimer y una máquina de
+estados no bloqueante.
 
 ## 8. Dependencia externa
 
@@ -141,3 +144,7 @@ El repositorio utiliza la biblioteca oficial
 indica su ubicación mediante `tools/local_config.ps1`. Esto evita guardar rutas
 personales en GitHub y mantiene separados el ejercicio y el SDK del fabricante.
 
+## 9. Archivos locales excluidos
+
+No se publican `build/`, `tools/local_config.ps1`, `.vscode/launch.json`, los
+binarios generados, el SDK, el compilador ni OpenOCD.

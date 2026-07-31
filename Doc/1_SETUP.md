@@ -11,11 +11,17 @@
 - Biblioteca `GD32VW55x_Firmware_Library_V1.6.0`.
 - Depurador CMSIS-DAP compatible, como WCH-Link.
 
+## Extensiones de Visual Studio Code
+
+Instale Cortex-Debug, CMake Tools y C/C++. El proyecto usa sus propios presets
+y tareas; no es necesario seleccionar una placa en CMake Project Setup.
+
 Compruebe CMake y Ninja:
 
 ```powershell
 cmake --version
 ninja --version
+git --version
 ```
 
 ## Configuración de rutas locales
@@ -47,10 +53,16 @@ la biblioteca GD32, al directorio `NucleiRISCVGCC/bin` y a la raíz de
 `local_config.ps1` no se sube a GitHub. De esta manera cada estudiante puede
 usar una instalación diferente sin modificar los archivos compartidos.
 
+Genere la configuración local de depuración con:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass `
+  -File .\tools\create_debug_config.ps1
+```
+
 ## Conexión
 
 1. Alimente la placa por USB.
 2. Conecte el WCH-Link mediante JTAG y niveles de 3,3 V.
 3. Verifique tierra común entre la placa y el depurador.
 4. Abra la carpeta raíz del ejercicio en VS Code.
-

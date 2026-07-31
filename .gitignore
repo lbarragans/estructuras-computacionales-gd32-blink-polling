@@ -1,6 +1,7 @@
 # Configuración local
 tools/local_config.ps1
 CMakeUserPresets.json
+.vscode/launch.json
 
 # Directorios generados por CMake
 /build/
@@ -34,4 +35,3 @@ subdir.mk
 *~
 .DS_Store
 Thumbs.db
-
