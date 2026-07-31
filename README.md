@@ -1,6 +1,7 @@
 # Exercise 00 - Blink con espera activa en GD32VW553
 
-**Curso:** Estructuras Computacionales (4100901)  
+**Curso:** Estructuras Computacionales  
+**Autora:** Laura Daniela Barragan Silva
 **Plataforma:** GD32VW553HMQ6 / GD32VW553HMQ7  
 **Arquitectura:** Nuclei RISC-V RV32  
 **Entorno:** Visual Studio Code, CMake, Ninja y Nuclei RISC-V GCC
@@ -58,7 +59,7 @@ flowchart TD
 ## 5. Estructura del repositorio
 
 ```text
-4100901-gd32vw553-blink-polling/
+estructuras-computacionales-gd32-blink-polling/
 ├── .vscode/
 │   └── tasks.json
 ├── Doc/
@@ -104,17 +105,34 @@ flowchart TD
 Las instrucciones detalladas están en [Doc/1_SETUP.md](Doc/1_SETUP.md) y
 [Doc/2_BUILD_AND_FLASH.md](Doc/2_BUILD_AND_FLASH.md).
 
-## 7. Relación con el curso
+## 7. Aprendizajes y evolución del ejercicio
 
-Este ejercicio es la línea base para comparar dos formas de temporización:
+Este ejercicio presenta una implementación sencilla del control de una salida
+digital y permite comprobar el funcionamiento completo del entorno de
+desarrollo: edición, compilación, enlace y programación del microcontrolador.
 
-| Ejercicio | Temporización | CPU durante la espera |
+Al finalizar se pueden reconocer los siguientes conceptos:
+
+- configuración de un GPIO como salida digital;
+- acceso al hardware mediante la biblioteca del fabricante;
+- compilación cruzada para una arquitectura RISC-V;
+- generación y programación de un archivo ejecutable;
+- funcionamiento y limitaciones de una espera activa.
+
+La espera activa facilita la primera prueba del hardware, pero mantiene al
+procesador ocupado y produce un tiempo aproximado. Esta implementación servirá
+como referencia para compararla posteriormente con una solución no bloqueante.
+
+| Característica | Implementación actual | Evolución posterior |
 |---|---|---|
-| Blink Polling | ciclos y `nop` | ocupada |
-| Semana 6 | SysTimer + interrupción | disponible para otras tareas |
+| Temporización | Espera activa con `nop` | SysTimer e interrupciones |
+| Uso de la CPU | Permanece ocupada | Puede ejecutar otras tareas |
+| Precisión | Aproximada | Determinada por el temporizador |
+| Organización | Bucle bloqueante | Máquina de estados |
+| Escalabilidad | Limitada | Adecuada para múltiples tareas |
 
-La siguiente evolución reemplazará el retardo bloqueante por SysTimer y una
-máquina de estados no bloqueante.
+En el siguiente ejercicio se conservará el control del LED en PC13, pero la
+temporización se realizará mediante SysTimer y una máquina de estados.
 
 ## 8. Dependencia externa
 
