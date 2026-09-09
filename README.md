@@ -1,150 +1,170 @@
-# Exercise 00 - Blink con espera activa en GD32VW553
+# Exercise 00 - Blink en GD32VW553: multiples formas de resolver el mismo problema
 
 **Curso:** Estructuras Computacionales  
 **Autora:** Laura Daniela Barragan Silva  
 **Plataforma:** GD32VW553HMQ6 / GD32VW553HMQ7  
 **Arquitectura:** Nuclei RISC-V RV32  
-**Entorno:** Visual Studio Code, CMake, Ninja y Nuclei RISC-V GCC
+**Entorno base:** Visual Studio Code, CMake, Ninja y Nuclei RISC-V GCC
 
-## 1. Propósito
+## 1. Proposito
 
-Este ejercicio verifica la cadena completa de desarrollo antes de comenzar las
-prácticas obligatorias de las semanas 5 a 8:
+El objetivo inicial sigue siendo verificar la cadena completa de desarrollo:
 
-1. editar código fuente;
-2. configurar el proyecto con CMake;
-3. compilar para RISC-V;
-4. generar archivos ELF, HEX, BIN, MAP y LST;
-5. programar la memoria flash con OpenOCD;
-6. observar el cambio de estado del LED conectado a PC13.
+1. editar codigo;
+2. compilar para RISC-V;
+3. enlazar;
+4. generar ELF, HEX, BIN, MAP y LST;
+5. programar con OpenOCD/WCH-Link;
+6. observar el LED conectado a PC13.
 
-El retardo de este ejercicio se produce mediante **espera activa**. El
-procesador permanece ejecutando instrucciones `nop` durante la espera. No se
-utiliza todavía SysTimer, interrupciones ni una máquina de estados.
+La implementacion que se compila **por defecto** continua siendo:
 
-## 2. Resultado esperado
-
-El programa cambia el estado lógico de PC13 aproximadamente cada tres segundos.
-Por tanto, cada estado dura cerca de 3 s y un ciclo completo encendido-apagado
-dura aproximadamente 6 s.
-
-> El LED de algunas placas puede ser activo en nivel bajo. En ese caso, el
-> significado eléctrico de encendido y apagado se invierte, pero el periodo de
-> conmutación permanece igual.
-
-## 3. Diagrama de bloques
-
-```mermaid
-flowchart LR
-    SRC["Src/main.c"] --> CMAKE["CMake + Ninja"]
-    CMAKE --> GCC["Nuclei RISC-V GCC"]
-    GCC --> ELF["GD32VW55x.elf"]
-    ELF --> OCD["OpenOCD + WCH-Link"]
-    OCD --> MCU["GD32VW553"]
-    MCU --> GPIO["GPIO PC13"]
-    GPIO --> LED["LED"]
+```text
+Src/main.c
 ```
 
-## 4. Flujo del programa
+y utiliza **C + espera activa (polling)**.
 
-```mermaid
-flowchart TD
-    A["Inicio"] --> B["Habilitar reloj GPIOC"]
-    B --> C["Configurar PC13 como salida"]
-    C --> D["Cambiar estado de PC13"]
-    D --> E["Espera activa aproximada de 3000 ms"]
-    E --> D
+A partir de esta fase, el repositorio tambien conserva otras maneras de producir el mismo Blink para estudiar que cambia dentro del procesador.
+
+## 2. Menu de implementaciones
+
+| # | Variante | Lenguaje / tecnologia | Que cambia | Estado |
+|---:|---|---|---|---|
+| 01 | C + Polling | C | CPU ocupada durante el retardo | Base actual |
+| 02 | Retardo externo en RISC-V | C + Assembly | el bucle de espera pasa a una funcion `.S` | Fuente lista |
+| 03 | SysTimer + interrupcion | C | tiempo generado por el temporizador del core | Basada en ejercicio verificado |
+| 04 | Maquina de estados | C | elimina el flujo bloqueante | Fuente lista |
+| 05 | Scheduler cooperativo | C | varias tareas periodicas sin RTOS | Fuente lista |
+| 06 | FreeRTOS | C + FreeRTOS | tarea bloqueada con `vTaskDelay` y scheduler | Integracion pendiente |
+
+Las fuentes educativas estan en [`Variantes/`](Variantes/README.md).
+
+> Las variantes no se agregan automaticamente al `CMakeLists.txt` principal. Esto es intencional: primero se conserva intacto el Blink que ya funciona y despues se integra y valida cada metodo con commits separados.
+
+## 3. Resultado fisico
+
+Todas las variantes buscan el mismo efecto:
+
+```text
+GPIO PC13 -> LED cambia de estado periodicamente
 ```
 
-## 5. Estructura del repositorio
+Lo que cambia no es necesariamente lo que se ve, sino **lo que hace la CPU mientras espera**.
+
+## 4. La pregunta principal
+
+> ¿Que esta haciendo el procesador entre un cambio del LED y el siguiente?
+
+### Polling
+
+```text
+CPU -> nop -> nop -> nop -> ... -> cambia LED
+```
+
+La CPU permanece ocupada.
+
+### SysTimer / FSM
+
+```text
+CPU -> consulta tiempo -> otras tareas -> consulta tiempo -> cambia LED
+```
+
+La aplicacion no necesita ejecutar un bucle de retardo largo.
+
+### FreeRTOS
+
+```text
+Tarea Blink -> vTaskDelay -> BLOQUEADA
+Scheduler -> ejecuta otras tareas
+```
+
+## 5. Por que la version base funciona
+
+`Src/main.c`:
+
+1. habilita el reloj de GPIOC;
+2. configura PC13 como salida;
+3. cambia el estado del pin;
+4. ejecuta una espera activa;
+5. repite indefinidamente.
+
+La espera funciona porque la CPU tarda tiempo real en ejecutar las instrucciones del bucle. Su precision, sin embargo, depende del reloj, del compilador y de la optimizacion.
+
+## 6. Por que puede no ser la mejor solucion
+
+La espera activa es apropiada para comenzar porque hace visible la secuencia de ejecucion, pero tiene limitaciones:
+
+- ocupa la CPU;
+- dificulta atender otras tareas;
+- el tiempo es aproximado;
+- escala mal cuando aumenta el numero de eventos.
+
+Por eso el repositorio conserva progresivamente otras soluciones.
+
+## 7. Estructura
 
 ```text
 estructuras-computacionales-gd32-blink-polling/
-├── .vscode/
-│   ├── extensions.json
-│   ├── launch.example.json
-│   └── tasks.json
+├── Src/
+│   └── main.c                     # implementacion que compila por defecto
+├── Inc/
 ├── Doc/
 │   ├── 1_SETUP.md
 │   ├── 2_BUILD_AND_FLASH.md
 │   ├── 3_CONCEPTS_AND_QUESTIONS.md
 │   ├── 4_DEBUGGING.md
-│   └── 5_TROUBLESHOOTING.md
-├── Inc/
-│   └── gd32vw55x_libopt.h
-├── Src/
-│   └── main.c
-├── cmake/
-│   ├── generate_listing.cmake
-│   └── toolchain-riscv.cmake
+│   ├── 5_TROUBLESHOOTING.md
+│   ├── 6_VARIANTES_DEL_EJERCICIO.md
+│   └── 7_PLAN_DE_VALIDACION.md
+├── Variantes/
+│   ├── 01_C_Polling/
+│   ├── 02_C_Assembly_ExternalDelay/
+│   ├── 03_SysTimer_Interrupt/
+│   ├── 04_StateMachine/
+│   ├── 05_Cooperative_Scheduler/
+│   └── 06_FreeRTOS/
 ├── tools/
-│   ├── configure.ps1
-│   ├── create_debug_config.ps1
-│   ├── flash.ps1
-│   └── local_config.example.ps1
-├── .gitignore
+├── .gitattributes
+├── REGLA_GLOBAL_LENGUAJES.md
 ├── CMakeLists.txt
-├── CMakePresets.json
 └── README.md
 ```
 
-## 6. Preparación rápida
+## 8. Lenguajes en GitHub
 
-1. Instale CMake, Ninja y GD32 Embedded Builder.
-2. Copie:
+La barra de lenguajes debe reflejar los lenguajes que realmente existen en las implementaciones.
 
-   ```text
-   tools/local_config.example.ps1
-   ```
+Como este repositorio contiene C y una variante con Assembly, es correcto que aparezcan:
 
-   como:
+```text
+C + Assembly
+```
 
-   ```text
-   tools/local_config.ps1
-   ```
+Los porcentajes exactos los calcula GitHub y suman 100%.
 
-3. Edite las tres rutas del archivo local.
-4. Abra esta carpeta como raíz del espacio de trabajo en VS Code.
-5. Ejecute la tarea `Build + Flash GD32`.
-6. Para depurar, ejecute `Create Debug Configuration` y seleccione
-   `Debug GD32VW553 - Cortex Debug`.
+PowerShell, CMake, JSON y Markdown se mantienen como herramientas/documentacion, pero no se cuentan como lenguajes de la solucion.
 
-Las instrucciones detalladas están en [Doc/1_SETUP.md](Doc/1_SETUP.md) y
-[Doc/2_BUILD_AND_FLASH.md](Doc/2_BUILD_AND_FLASH.md).
+## 9. FreeRTOS
 
-La depuración se explica en [Doc/4_DEBUGGING.md](Doc/4_DEBUGGING.md) y los
-errores frecuentes en [Doc/5_TROUBLESHOOTING.md](Doc/5_TROUBLESHOOTING.md).
+FreeRTOS **no es un lenguaje**. La variante esta escrita en C.
 
-## 7. Aprendizajes y evolución del ejercicio
+El SDK oficial GD32VW55x WiFi/BLE contiene fuentes de FreeRTOS, pero el proyecto base actual usa la Firmware Library clasica y todavia no enlaza el kernel/port de FreeRTOS.
 
-Este ejercicio permite comprobar el entorno completo de edición, compilación,
-enlace y programación del microcontrolador. Al finalizar se reconocen:
+Por eso la variante se incluye como siguiente paso de integracion y **no se afirma que compile dentro del CMake actual hasta realizar esa integracion y validarla en la placa**.
 
-- configuración de un GPIO como salida digital;
-- acceso al hardware mediante la biblioteca del fabricante;
-- compilación cruzada para RISC-V;
-- generación y programación de un archivo ejecutable;
-- funcionamiento y limitaciones de una espera activa.
+## 10. Filosofia de validacion
 
-| Característica | Implementación actual | Evolución posterior |
-|---|---|---|
-| Temporización | Espera activa con `nop` | SysTimer e interrupciones |
-| Uso de la CPU | Permanece ocupada | Puede ejecutar otras tareas |
-| Precisión | Aproximada | Determinada por el temporizador |
-| Organización | Bucle bloqueante | Máquina de estados |
-| Escalabilidad | Limitada | Adecuada para múltiples tareas |
+Nunca reemplazaremos una solucion funcional sin conservarla.
 
-El siguiente ejercicio conserva PC13, pero utiliza SysTimer y una máquina de
-estados no bloqueante.
+Cada nueva forma se incorporara con:
 
-## 8. Dependencia externa
+1. fuente;
+2. explicacion;
+3. razon de funcionamiento;
+4. limitaciones;
+5. prueba de compilacion;
+6. prueba en placa;
+7. commit separado.
 
-El repositorio utiliza la biblioteca oficial
-`GD32VW55x_Firmware_Library_V1.6.0`, pero no copia sus drivers. Cada usuario
-indica su ubicación mediante `tools/local_config.ps1`. Esto evita guardar rutas
-personales en GitHub y mantiene separados el ejercicio y el SDK del fabricante.
-
-## 9. Archivos locales excluidos
-
-No se publican `build/`, `tools/local_config.ps1`, `.vscode/launch.json`, los
-binarios generados, el SDK, el compilador ni OpenOCD.
+Ver [`Doc/7_PLAN_DE_VALIDACION.md`](Doc/7_PLAN_DE_VALIDACION.md).
