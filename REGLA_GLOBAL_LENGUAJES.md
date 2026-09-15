@@ -1,12 +1,13 @@
 # Regla global de lenguajes
 
-Esta regla se aplicara a todos los repositorios del curso.
+Cada lenguaje que forme parte real de una implementacion debe aparecer en
+GitHub.
 
-- Si una implementacion usa C, C debe aparecer.
-- Si usa Assembly, Assembly debe aparecer.
-- Si usa C + Assembly, deben aparecer ambos.
-- FreeRTOS es una tecnologia/RTOS, no un lenguaje; normalmente GitHub mostrara C.
-- PowerShell, CMake, JSON, Markdown y configuracion de VS Code son auxiliares y no deben alterar los porcentajes.
-- Solo se mostrara `100%` de un lenguaje cuando la solucion sea realmente de un unico lenguaje detectable.
+En este repositorio:
 
-Los porcentajes de GitHub representan cantidad de codigo detectable, no importancia pedagogica.
+- C cuenta porque la referencia y FreeRTOS estan escritos en C.
+- Ensamblador RISC-V cuenta porque existe una implementacion pura en `.S`.
+- FreeRTOS es una tecnologia/RTOS, no un lenguaje.
+- PowerShell, CMake, JSON y Markdown son auxiliares.
+
+No se fuerza artificialmente un porcentaje.

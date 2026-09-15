@@ -1,4 +1,4 @@
-# Exercise 00 - Blink en GD32VW553: multiples formas de resolver el mismo problema
+# Exercise 00 - Blink en GD32VW553
 
 **Curso:** Estructuras Computacionales  
 **Autora:** Laura Daniela Barragan Silva  
@@ -8,163 +8,183 @@
 
 ## 1. Proposito
 
-El objetivo inicial sigue siendo verificar la cadena completa de desarrollo:
-
-1. editar codigo;
-2. compilar para RISC-V;
-3. enlazar;
-4. generar ELF, HEX, BIN, MAP y LST;
-5. programar con OpenOCD/WCH-Link;
-6. observar el LED conectado a PC13.
-
-La implementacion que se compila **por defecto** continua siendo:
+Este repositorio conserva la implementacion original funcional en:
 
 ```text
 Src/main.c
 ```
 
-y utiliza **C + espera activa (polling)**.
+como referencia del ejercicio.
 
-A partir de esta fase, el repositorio tambien conserva otras maneras de producir el mismo Blink para estudiar que cambia dentro del procesador.
-
-## 2. Menu de implementaciones
-
-| # | Variante | Lenguaje / tecnologia | Que cambia | Estado |
-|---:|---|---|---|---|
-| 01 | C + Polling | C | CPU ocupada durante el retardo | Base actual |
-| 02 | Retardo externo en RISC-V | C + Assembly | el bucle de espera pasa a una funcion `.S` | Fuente lista |
-| 03 | SysTimer + interrupcion | C | tiempo generado por el temporizador del core | Basada en ejercicio verificado |
-| 04 | Maquina de estados | C | elimina el flujo bloqueante | Fuente lista |
-| 05 | Scheduler cooperativo | C | varias tareas periodicas sin RTOS | Fuente lista |
-| 06 | FreeRTOS | C + FreeRTOS | tarea bloqueada con `vTaskDelay` y scheduler | Integracion pendiente |
-
-Las fuentes educativas estan en [`Variantes/`](Variantes/README.md).
-
-> Las variantes no se agregan automaticamente al `CMakeLists.txt` principal. Esto es intencional: primero se conserva intacto el Blink que ya funciona y despues se integra y valida cada metodo con commits separados.
-
-## 3. Resultado fisico
-
-Todas las variantes buscan el mismo efecto:
+A partir de esta revision, las unicas dos implementaciones alternativas que se
+conservan son:
 
 ```text
-GPIO PC13 -> LED cambia de estado periodicamente
+Ensamblador_RISCV_Puro/
+FreeRTOS_Puro/
 ```
 
-Lo que cambia no es necesariamente lo que se ve, sino **lo que hace la CPU mientras espera**.
+Se eliminan las antiguas carpetas de variantes de polling alternativo,
+SysTimer, maquina de estados, scheduler cooperativo y formas hibridas.
 
-## 4. La pregunta principal
-
-> ¿Que esta haciendo el procesador entre un cambio del LED y el siguiente?
-
-### Polling
+## 2. Estructura definitiva
 
 ```text
-CPU -> nop -> nop -> nop -> ... -> cambia LED
-```
-
-La CPU permanece ocupada.
-
-### SysTimer / FSM
-
-```text
-CPU -> consulta tiempo -> otras tareas -> consulta tiempo -> cambia LED
-```
-
-La aplicacion no necesita ejecutar un bucle de retardo largo.
-
-### FreeRTOS
-
-```text
-Tarea Blink -> vTaskDelay -> BLOQUEADA
-Scheduler -> ejecuta otras tareas
-```
-
-## 5. Por que la version base funciona
-
-`Src/main.c`:
-
-1. habilita el reloj de GPIOC;
-2. configura PC13 como salida;
-3. cambia el estado del pin;
-4. ejecuta una espera activa;
-5. repite indefinidamente.
-
-La espera funciona porque la CPU tarda tiempo real en ejecutar las instrucciones del bucle. Su precision, sin embargo, depende del reloj, del compilador y de la optimizacion.
-
-## 6. Por que puede no ser la mejor solucion
-
-La espera activa es apropiada para comenzar porque hace visible la secuencia de ejecucion, pero tiene limitaciones:
-
-- ocupa la CPU;
-- dificulta atender otras tareas;
-- el tiempo es aproximado;
-- escala mal cuando aumenta el numero de eventos.
-
-Por eso el repositorio conserva progresivamente otras soluciones.
-
-## 7. Estructura
-
-```text
-estructuras-computacionales-gd32-blink-polling/
+00_Blink_Polling/
 ├── Src/
-│   └── main.c                     # implementacion que compila por defecto
-├── Inc/
+│   └── main.c
+├── Ensamblador_RISCV_Puro/
+│   ├── main.S
+│   ├── README.md
+│   └── MAPA_REGISTROS.md
+├── FreeRTOS_Puro/
+│   ├── main.c
+│   ├── README.md
+│   └── INTEGRACION.md
 ├── Doc/
-│   ├── 1_SETUP.md
-│   ├── 2_BUILD_AND_FLASH.md
-│   ├── 3_CONCEPTS_AND_QUESTIONS.md
-│   ├── 4_DEBUGGING.md
-│   ├── 5_TROUBLESHOOTING.md
-│   ├── 6_VARIANTES_DEL_EJERCICIO.md
-│   └── 7_PLAN_DE_VALIDACION.md
-├── Variantes/
-│   ├── 01_C_Polling/
-│   ├── 02_C_Assembly_ExternalDelay/
-│   ├── 03_SysTimer_Interrupt/
-│   ├── 04_StateMachine/
-│   ├── 05_Cooperative_Scheduler/
-│   └── 06_FreeRTOS/
-├── tools/
 ├── .gitattributes
 ├── REGLA_GLOBAL_LENGUAJES.md
+├── NOTA_LINGUIST.md
 ├── CMakeLists.txt
 └── README.md
 ```
 
-## 8. Lenguajes en GitHub
+## 3. Implementacion original
 
-La barra de lenguajes debe reflejar los lenguajes que realmente existen en las implementaciones.
+`Src/main.c` se conserva porque es la referencia que ya funciona y permite
+comparar el resultado fisico con los dos apartados nuevos.
 
-Como este repositorio contiene C y una variante con Assembly, es correcto que aparezcan:
+No se presenta como una tercera variante de estudio.
+
+## 4. Ensamblador RISC-V puro
+
+Este apartado contiene:
 
 ```text
-C + Assembly
+Ensamblador_RISCV_Puro/main.S
 ```
 
-Los porcentajes exactos los calcula GitHub y suman 100%.
+No contiene archivos `.c`.
 
-PowerShell, CMake, JSON y Markdown se mantienen como herramientas/documentacion, pero no se cuentan como lenguajes de la solucion.
+La aplicacion configura directamente:
 
-## 9. FreeRTOS
+```text
+RCU_AHB1EN
+GPIOC_CTL
+GPIOC_OMODE
+GPIOC_OSPD
+GPIOC_PUD
+GPIOC_BOP
+GPIOC_TG
+```
 
-FreeRTOS **no es un lenguaje**. La variante esta escrita en C.
+mediante instrucciones RISC-V y acceso MMIO.
 
-El SDK oficial GD32VW55x WiFi/BLE contiene fuentes de FreeRTOS, pero el proyecto base actual usa la Firmware Library clasica y todavia no enlaza el kernel/port de FreeRTOS.
+No llama funciones C para:
 
-Por eso la variante se incluye como siguiente paso de integracion y **no se afirma que compile dentro del CMake actual hasta realizar esa integracion y validarla en la placa**.
+- habilitar el reloj de GPIOC;
+- configurar PC13;
+- cambiar el estado del LED;
+- generar el retardo.
 
-## 10. Filosofia de validacion
+La secuencia es:
 
-Nunca reemplazaremos una solucion funcional sin conservarla.
+```text
+habilitar GPIOC
+      ↓
+configurar PC13
+      ↓
+dejar LED apagado
+      ↓
+conmutar PC13
+      ↓
+retardo por instrucciones
+      ↓
+repetir
+```
 
-Cada nueva forma se incorporara con:
+## 5. FreeRTOS puro
 
-1. fuente;
-2. explicacion;
-3. razon de funcionamiento;
-4. limitaciones;
-5. prueba de compilacion;
-6. prueba en placa;
-7. commit separado.
+FreeRTOS no es un lenguaje; la aplicacion se escribe en C.
 
-Ver [`Doc/7_PLAN_DE_VALIDACION.md`](Doc/7_PLAN_DE_VALIDACION.md).
+En este repositorio, **FreeRTOS puro** significa que la planificacion y la
+temporizacion de la aplicacion dependen de primitivas nativas de FreeRTOS.
+
+La aplicacion usa:
+
+```text
+xTaskCreate()
+vTaskStartScheduler()
+xTaskDelayUntil()
+```
+
+y no usa para generar el periodo:
+
+```text
+busy-wait
+delay_ms artesanal
+scheduler cooperativo propio
+maquina de estados
+consulta manual de SysTimer
+```
+
+La estructura es:
+
+```text
+main
+  ↓
+inicializar GPIO
+  ↓
+crear BlinkTask
+  ↓
+arrancar scheduler
+  ↓
+BlinkTask
+  ↓
+toggle PC13
+  ↓
+xTaskDelayUntil
+```
+
+## 6. Diferencia entre los dos apartados
+
+| Apartado | Que significa "puro" |
+|---|---|
+| Ensamblador RISC-V puro | toda la logica de aplicacion esta escrita en `main.S`, sin C |
+| FreeRTOS puro | toda la planificacion y temporizacion usa primitivas nativas del RTOS |
+
+## 7. Estado
+
+| Implementacion | Estado |
+|---|---|
+| `Src/main.c` | referencia funcional |
+| `Ensamblador_RISCV_Puro` | fuente lista; pendiente de integrar y validar |
+| `FreeRTOS_Puro` | fuente lista; integracion del kernel/port pendiente |
+
+## 8. Lenguajes en GitHub
+
+El codigo real del repositorio contiene:
+
+```text
+C
+Ensamblador RISC-V
+```
+
+FreeRTOS se programa en C, por lo que no aparece como lenguaje independiente.
+
+PowerShell, CMake, JSON y Markdown no deben alterar la barra de lenguajes.
+
+## 9. Regla para los siguientes ejercicios
+
+La misma estructura se aplicara progresivamente a los demas ejercicios:
+
+```text
+codigo original de referencia
++
+Ensamblador_RISCV_Puro
++
+FreeRTOS_Puro
+```
+
+No se conservaran las otras variantes educativas salvo que exista una razon
+especifica para mantenerlas.

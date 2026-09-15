@@ -1,16 +1,8 @@
-# Politica de GitHub Linguist
+# Politica de lenguajes
 
-Este repositorio contiene varias maneras reales de resolver el mismo ejercicio de Blink.
+El repositorio contiene codigo real en C y en ensamblador RISC-V.
 
-Por esa razon, al agregar una variante con RISC-V Assembly, GitHub puede mostrar una combinacion como:
+La implementacion FreeRTOS esta escrita en C.
 
-```text
-C          xx.x %
-Assembly   yy.y %
-```
-
-Eso es correcto: ambos lenguajes participan en las implementaciones guardadas.
-
-No se ocultara C para forzar `Assembly 100%` ni se ocultara Assembly para forzar `C 100%`.
-
-Los scripts PowerShell existentes pueden seguir utilizandose localmente, pero `.gitattributes` evita que aparezcan como lenguaje del ejercicio.
+Los scripts y archivos de configuracion no forman parte del lenguaje de la
+solucion y se excluyen mediante `.gitattributes`.
