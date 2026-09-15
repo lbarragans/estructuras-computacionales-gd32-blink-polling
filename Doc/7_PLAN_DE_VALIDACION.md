@@ -1,44 +1,45 @@
-# 7. Plan de validacion de las variantes
+# 7. Plan de validacion
 
-## Regla
+## Referencia original
 
-Una fuente no se declarara "validada" solamente porque se vea correcta.
+Primero comprobar que `Src/main.c` continua compilando y produciendo el Blink
+esperado.
 
-Para cada variante realizaremos:
+## Ensamblador RISC-V puro
 
-1. revision de codigo;
-2. integracion con CMake;
-3. `cmake --build`;
-4. revision de warnings;
-5. carga en GD32VW553;
-6. observacion del LED;
-7. depuracion si aplica;
-8. commit independiente.
+Validar:
 
-## Orden recomendado
+1. integracion de `Ensamblador_RISCV_Puro/main.S`;
+2. compilacion sin `main.c` de aplicacion;
+3. habilitacion del reloj GPIOC;
+4. PC13 en modo salida;
+5. push-pull;
+6. velocidad configurada;
+7. ausencia de pull-up/pull-down;
+8. estado inicial del LED;
+9. toggle mediante registro MMIO;
+10. retardo implementado solamente en ensamblador;
+11. prueba fisica en placa.
 
-### Fase A - documentacion y Linguist
-Agregar menu, reglas de lenguajes y carpeta `Variantes`.
+## FreeRTOS puro
 
-### Fase B - C + Assembly externo
-Integrar `delay_riscv.S` y comprobar llamadas C -> Assembly.
+Validar:
 
-### Fase C - SysTimer
-Integrar la variante ya conocida del ejercicio SysTimer.
+1. kernel FreeRTOS;
+2. port RISC-V;
+3. `FreeRTOSConfig.h`;
+4. heap;
+5. tick del kernel;
+6. creacion de `BlinkTask`;
+7. arranque de `vTaskStartScheduler()`;
+8. periodo mediante `xTaskDelayUntil()`;
+9. ausencia de busy-wait como temporizador;
+10. prueba fisica en placa.
 
-### Fase D - maquina de estados
-Validar comportamiento no bloqueante.
+## Estados
 
-### Fase E - scheduler cooperativo
-Validar dos tareas periodicas.
-
-### Fase F - FreeRTOS
-Integrar kernel + port + `FreeRTOSConfig.h`, compilar y validar `vTaskDelay`.
-
-## Estados usados en la documentacion
-
-- **Base actual**: ya es la implementacion principal.
-- **Basada en ejercicio verificado**: codigo utilizado en otro repositorio funcional, aun no seleccionado por este CMake.
-- **Fuente lista**: codigo educativo preparado, pendiente de integracion/compilacion en este repositorio.
-- **Integracion pendiente**: requiere dependencias adicionales antes de compilar.
-- **Validada en placa**: solo se usara despues de una prueba fisica satisfactoria.
+- referencia funcional;
+- fuente lista;
+- integracion pendiente;
+- validada por compilacion;
+- validada en placa.
