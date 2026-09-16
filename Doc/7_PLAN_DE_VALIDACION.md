@@ -40,6 +40,6 @@ Validar:
 
 - referencia funcional;
 - fuente lista;
-- integracion pendiente;
+- integrada mediante `APP_VARIANT=assembly` o como aplicacion MSDK FreeRTOS;
 - validada por compilacion;
 - validada en placa.

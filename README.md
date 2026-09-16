@@ -158,8 +158,8 @@ xTaskDelayUntil
 | Implementacion | Estado |
 |---|---|
 | `Src/main.c` | referencia funcional |
-| `Ensamblador_RISCV_Puro` | fuente lista; pendiente de integrar y validar |
-| `FreeRTOS_Puro` | fuente lista; integracion del kernel/port pendiente |
+| `Ensamblador_RISCV_Puro` | seleccionable con `APP_VARIANT=assembly`; validacion fisica requerida |
+| `FreeRTOS_Puro` | aplicacion MSDK sobre FreeRTOS oficial V1.0.3g |
 
 ## 8. Lenguajes en GitHub
 
@@ -188,3 +188,26 @@ FreeRTOS_Puro
 
 No se conservaran las otras variantes educativas salvo que exista una razon
 especifica para mantenerlas.
+
+## Ejecutar las variantes
+
+Referencia original por JTAG/OpenOCD:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\build_variant.ps1 -Variant original -Flash
+```
+
+Assembly puro por JTAG/OpenOCD:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\\tools\\build_variant.ps1 -Variant assembly -Flash
+```
+
+FreeRTOS usa el port oficial del SDK WiFi V1.0.3g. Copie la carpeta completa
+`FreeRTOS_Puro/` dentro de `MSDK/` y siga `FreeRTOS_Puro/INTEGRACION.md`.
+
+## Guía central de ejecución
+
+Para instalar herramientas, reconocer la placa en Windows/VS Code e integrar
+Assembly y FreeRTOS paso a paso, consulte la
+[guía central GD32VW553](https://github.com/lbarragans/gd32vw553-vscode-cmake-guide).

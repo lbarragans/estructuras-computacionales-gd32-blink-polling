@@ -9,7 +9,8 @@ primitivas nativas de FreeRTOS.
 
 ```text
 xTaskCreate()
-vTaskStartScheduler()
+sys_os_init()
+sys_os_start()
 xTaskDelayUntil()
 ```
 
@@ -25,5 +26,5 @@ consulta manual de SysTimer
 
 ## Estado
 
-Fuente lista. La integracion del kernel, port RISC-V, heap y configuracion sigue
-pendiente.
+Aplicacion MSDK completa: usa el kernel y el port oficial incluidos en
+`GD32VW55x_RELEASE_V1.0.3g`. Consulte `INTEGRACION.md`.

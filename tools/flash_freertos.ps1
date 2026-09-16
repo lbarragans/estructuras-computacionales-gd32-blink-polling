@@ -1,45 +1,36 @@
 [CmdletBinding()]
-param(
-    [ValidateSet("Debug", "Release")]
-    [string]$BuildType = "Debug"
-)
+param()
 
 $ErrorActionPreference = "Stop"
-$ProjectRoot = Split-Path -Parent $PSScriptRoot
 $ConfigFile = Join-Path $PSScriptRoot "local_config.ps1"
 
 if (-not (Test-Path $ConfigFile)) {
-    throw @"
-Missing tools/local_config.ps1.
-Copy tools/local_config.example.ps1 as tools/local_config.ps1 and edit it.
-"@
+    throw "Copy tools/local_config.example.ps1 as tools/local_config.ps1 and edit it."
 }
 
 . $ConfigFile
 
+if ([string]::IsNullOrWhiteSpace($GD32_MSDK_ROOT)) {
+    throw "GD32_MSDK_ROOT is not configured in tools/local_config.ps1."
+}
+
 if ([string]::IsNullOrWhiteSpace($OPENOCD_ROOT)) {
-    throw "OPENOCD_ROOT is not configured."
+    throw "OPENOCD_ROOT is not configured in tools/local_config.ps1."
 }
 
 $OpenOcdExe = Join-Path $OPENOCD_ROOT "bin/openocd.exe"
 $OpenOcdScripts = Join-Path $OPENOCD_ROOT "scripts"
-$BuildFolder = $BuildType.ToLowerInvariant()
-$ElfPath = Join-Path `
-    $ProjectRoot "build/$BuildFolder/GD32VW55x.elf"
+$ImagePath = Join-Path $GD32_MSDK_ROOT "scripts/images/image-all.bin"
 
-foreach ($RequiredPath in @(
-    $OpenOcdExe,
-    $OpenOcdScripts,
-    $ElfPath
-)) {
+foreach ($RequiredPath in @($OpenOcdExe, $OpenOcdScripts, $ImagePath)) {
     if (-not (Test-Path $RequiredPath)) {
         throw "Required path was not found: $RequiredPath"
     }
 }
 
-$ElfForOpenOcd = (Resolve-Path $ElfPath).Path.Replace("\", "/")
+$ImageForOpenOcd = (Resolve-Path $ImagePath).Path.Replace("\", "/")
 $ProgramCommand = `
-    "program {$ElfForOpenOcd} verify reset exit"
+    "program {$ImageForOpenOcd} 0x08000000 verify reset exit"
 
 & $OpenOcdExe `
     -s $OpenOcdScripts `

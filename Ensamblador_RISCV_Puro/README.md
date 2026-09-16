@@ -28,4 +28,5 @@ repetir
 
 ## Estado
 
-Fuente lista. Pendiente de integracion CMake y validacion en placa.
+Integrada en CMake mediante `APP_VARIANT=assembly`. La prueba fisica final se
+ejecuta con `tools/build_variant.ps1 -Variant assembly -Flash`.

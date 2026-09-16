@@ -1,5 +1,9 @@
 #include <stdint.h>
 
+#include "app_cfg.h"
+#include "gd32vw55x_platform.h"
+#include "wrapper_os.h"
+
 #include "gd32vw55x.h"
 #include "FreeRTOS.h"
 #include "task.h"
@@ -46,6 +50,8 @@ static void blink_task(void *argument)
 
 int main(void)
 {
+    sys_os_init();
+    platform_init();
     led_init();
 
     BaseType_t created = xTaskCreate(
@@ -62,7 +68,7 @@ int main(void)
         }
     }
 
-    vTaskStartScheduler();
+    sys_os_start();
 
     for (;;) {
     }
