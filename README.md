@@ -16,6 +16,19 @@ Src/main.c
 
 como referencia del ejercicio.
 
+## Preparacion obligatoria para la primera clase
+
+1. Instale las herramientas bajo `C:\gd32_tools` siguiendo la guia central.
+2. Agregue CMake, Ninja, Nuclei GCC y OpenOCD al PATH.
+3. Antes de abrir VS Code, haga doble clic en `check_env.bat`.
+4. No continue mientras aparezca una linea `[FALTA]`.
+5. Copie `tools/local_config.example.ps1` como `local_config.ps1`.
+6. Abra solamente la raiz de este repositorio en VS Code.
+7. Ejecute la tarea de verificacion y luego **Build + Flash Original**.
+
+El compilador correcto es `riscv-nuclei-elf-gcc`. La programacion validada usa
+WCH-Link CMSIS-DAP v2 por USB bulk, VID/PID `1A86:8012`, JTAG a 50 kHz.
+
 A partir de esta revision, las unicas dos implementaciones alternativas que se
 conservan son:
 
